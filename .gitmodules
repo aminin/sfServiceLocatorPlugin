@@ -1,0 +1,3 @@
+[submodule "lib/vendor/dependencyInjection"]
+	path = lib/vendor/dependencyInjection
+	url = https://github.com/fabpot/dependency-injection
