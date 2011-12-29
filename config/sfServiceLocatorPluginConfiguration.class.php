@@ -30,6 +30,7 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
    * Being connected to [component].method_not_found eventExtends symfony
    * components with getServiceContainer and getService
    *
+   * @param sfEvent $event
    * @return boolean true to stop notifying other listeners
    * @see sfEventDispatcher::notifyUntil
    */
@@ -64,6 +65,8 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
    * Initialize the service container and cache it.
    *
    * Notify a service_container.load_configuration event.
+   *
+   * @param sfEvent $event
    */
   public function initializeServiceContainer(sfEvent $event)
   {
