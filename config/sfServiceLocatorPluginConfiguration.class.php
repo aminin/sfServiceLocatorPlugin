@@ -57,6 +57,9 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
    */
   public function getServiceContainer()
   {
+    if (!$this->serviceContainer)
+      self::initializeServiceContainer(new sfEvent(null, 'service_container.initialize_service_container'));
+
     return $this->serviceContainer;
   }
 
@@ -67,7 +70,6 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
    */
   public function initializeServiceContainer(sfEvent $event)
   {
-
     $application = sfConfig::get('sf_app');
     $debug       = sfConfig::get('sf_debug');
     $environment = sfConfig::get('sf_environment');
@@ -122,7 +124,7 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
       'ini' => new sfServiceContainerLoaderFileIni($sc)
     );
 
-    foreach (array(sfConfig::get('sf_config_dir'), sfConfig::get('sf_app_config_dir')) as $dir)
+    foreach (self::getConfigDirs() as $dir)
     {
       foreach ($loaders as $extension => $loader)
       {
@@ -142,5 +144,28 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
     }
 
     return $sc;
+  }
+
+  public static function getConfigDirs()
+  {
+    $configDirs = array(
+      sfConfig::get('sf_config_dir'),
+      sfConfig::get('sf_app_config_dir'),
+    );
+
+    try {
+      $directoryIterator = new DirectoryIterator(sfConfig::get('sf_plugins_dir'));
+
+      foreach ($directoryIterator as $dir) {
+        /** @var SplFileInfo $dir */
+        if ($dir->isDir() && !preg_match("~^\.~", $dir->getFilename())) {
+          $configDirs[] = $dir->getPathname() . '/config';
+        }
+      }
+    } catch (UnexpectedValueException $e) {
+      // Silently skip plugin configuration if sf_plugins_dir doesn't exist
+    }
+
+    return $configDirs;
   }
 }

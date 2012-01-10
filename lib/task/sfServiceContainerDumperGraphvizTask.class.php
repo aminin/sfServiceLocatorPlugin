@@ -32,7 +32,12 @@ EOF;
   {
     $sc = $this->configuration->getServiceContainer();
     $dumper = new sfServiceContainerDumperGraphviz($sc);
-    file_put_contents(sfConfig::get('sf_data_dir').'/container.dot', $dumper->dump());
+    $dotFile = sfConfig::get('sf_data_dir') . '/container.dot';
+
+    if (false !== file_put_contents($dotFile, $dumper->dump()))
+      $this->log(sprintf('Services are dumped into %s', $dotFile));
+    else
+      $this->log(sprintf('Can\'t dump services into %s', $dotFile));
   }
 }
  
