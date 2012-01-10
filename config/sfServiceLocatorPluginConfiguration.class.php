@@ -20,7 +20,7 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
   {
     $this->dispatcher->connect('context.load_factories', array($this, 'initializeServiceContainer'));
 
-    foreach (array('configuration', 'context', 'form', 'response', 'user', 'view') as $component)
+    foreach (array('component', 'configuration', 'context', 'form', 'response', 'user', 'view') as $component)
       $this->dispatcher->connect("$component.method_not_found", array($this, 'listenToMethodNotFound'));
   }
 
@@ -148,10 +148,7 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
 
   public static function getConfigDirs()
   {
-    $configDirs = array(
-      sfConfig::get('sf_config_dir'),
-      sfConfig::get('sf_app_config_dir'),
-    );
+    $configDirs = array();
 
     try {
       $directoryIterator = new DirectoryIterator(sfConfig::get('sf_plugins_dir'));
@@ -165,6 +162,9 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
     } catch (UnexpectedValueException $e) {
       // Silently skip plugin configuration if sf_plugins_dir doesn't exist
     }
+
+    $configDirs[] = sfConfig::get('sf_config_dir');
+    $configDirs[] = sfConfig::get('sf_app_config_dir');
 
     return $configDirs;
   }
