@@ -19,9 +19,6 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
   public function initialize()
   {
     $this->dispatcher->connect('context.load_factories', array($this, 'initializeServiceContainer'));
-
-    foreach (array('component', 'configuration', 'context', 'form', 'response', 'user', 'view') as $component)
-      $this->dispatcher->connect("$component.method_not_found", array($this, 'listenToMethodNotFound'));
   }
 
   /**
@@ -43,7 +40,10 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
 
     if ('getService' == $event['method'])
     {
-      $event->setReturnValue($this->getServiceContainer()->getService($event['arguments'][0]));
+      if ($sc = $this->getServiceContainer())
+        $event->setReturnValue($sc->getService($event['arguments'][0]));
+      else
+        $event->setReturnValue($sc->getService(null));
       return true;
     }
 
@@ -57,9 +57,6 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
    */
   public function getServiceContainer()
   {
-    if (!$this->serviceContainer)
-      self::initializeServiceContainer(new sfEvent(null, 'service_container.initialize_service_container'));
-
     return $this->serviceContainer;
   }
 
@@ -100,6 +97,9 @@ class sfServiceLocatorPluginConfiguration extends sfPluginConfiguration
     }
     $this->serviceContainer = $sc;
     $this->dispatcher->notify(new sfEvent($this->serviceContainer, 'service_container.post_initialize'));
+
+    foreach (array('component', 'configuration', 'context', 'form', 'response', 'user', 'view') as $component)
+      $this->dispatcher->connect("$component.method_not_found", array($this, 'listenToMethodNotFound'));
   }
 
   /**
